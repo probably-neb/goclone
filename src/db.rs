@@ -4,7 +4,7 @@ use std::ops::{Deref, DerefMut};
 use std::collections::HashMap;
 use serde::{Serialize,Deserialize};
 
-const DB_PATH: &str = "./db";
+const DB_PATH: &str = "./db.json";
 
 #[derive(Debug)]
 pub struct DB {
