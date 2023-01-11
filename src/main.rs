@@ -1,5 +1,6 @@
 mod db;
 mod cmd;
+mod rclone;
 use cmd::{Cli, Parser, Run};
 
 fn main() {

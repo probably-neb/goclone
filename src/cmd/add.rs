@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use clap::Args;
 
 use super::Run;
@@ -23,6 +25,10 @@ impl Add {
 impl Run for Add {
     fn run(&self) {
         let mut db = DB::load();
+        let Entry { remote_path: _, local_path } = self.as_entry();
+        if !Path::new(&local_path).exists() {
+            panic!("Local path must exist");
+        }
         db.insert(self.as_entry());
         println!("{db:?}");
     }

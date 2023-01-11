@@ -4,3 +4,4 @@ spec.md
 target
 db
 olddb.json
+Cargo.lock

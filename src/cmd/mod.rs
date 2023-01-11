@@ -1,9 +1,13 @@
 use enum_dispatch::enum_dispatch;
-use clap::{Args, Subcommand};
+use clap::Subcommand;
 pub use clap::Parser;
 
 mod add;
 use add::Add;
+mod list;
+use list::List;
+mod check;
+use check::CheckDb;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -23,7 +27,9 @@ pub enum SubCommands {
     // Copy(Copy),
     /// Add a mapping between a remote and local path
     #[command(author,version,about,long_about=None)]
-    Add(Add)
+    Add(Add),
+    List(List),
+    CheckDb(CheckDb),
 }
 
 #[enum_dispatch(SubCommands)]
@@ -38,4 +44,6 @@ pub trait Run {
     }
 }
 
+// #[derive(Args,Debug)]
+// struct Copy;
 
