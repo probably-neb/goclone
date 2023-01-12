@@ -3,7 +3,7 @@ use std::path::Path;
 use clap::Args;
 
 use super::Run;
-use crate::db::{DB,Entry};
+use crate::db::{Config,Entry};
 
 // TODO: add checks and --no-check flag
 #[derive(Args, Debug, Clone)]
@@ -24,12 +24,12 @@ impl Add {
 
 impl Run for Add {
     fn run(&self) {
-        let mut db = DB::load();
+        let mut db = Config::load();
         let Entry { remote_path: _, local_path } = self.as_entry();
         if !Path::new(&local_path).exists() {
             panic!("Local path must exist");
         }
-        db.insert(self.as_entry());
+        db.map.insert(self.as_entry());
         println!("{db:?}");
     }
 }

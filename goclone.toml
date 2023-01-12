@@ -1,0 +1,3 @@
+[local_to_remote]
+"./db.toml" = "db:goclone"
+"./README.md" = "db:remote"

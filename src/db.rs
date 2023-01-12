@@ -2,24 +2,20 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::ops::{Deref, DerefMut};
-use std::slice::Iter;
 
-const DB_PATH: &str = "./db.json";
-
-#[derive(Debug)]
-pub struct DB {
-    pub map: BiMap,
-    path_str: String,
-}
+const DB_PATH: &str = "./goclone.toml";
 
 #[derive(Deserialize, Serialize, Debug, Default)]
-pub struct BiMap {
-    pub remote_to_local: HashMap<String, String>,
+pub struct Config {
+    pub map: PathMap,
+}
+
+#[derive(Deserialize, Serialize, Default, Debug)]
+pub struct PathMap {
     pub local_to_remote: HashMap<String, String>,
 }
 
-impl BiMap {
+impl PathMap {
     pub fn as_vec(&self) -> Vec<Entry> {
         let entries: Vec<Entry> = self
             .local_to_remote
@@ -33,55 +29,33 @@ impl BiMap {
     }
 
     pub fn insert(&mut self, entry: Entry) {
-        self.remote_to_local
-            .insert(entry.remote_path.clone(), entry.local_path.clone());
         self.local_to_remote
             .insert(entry.local_path, entry.remote_path);
     }
 }
 
-impl Default for DB {
-    fn default() -> Self {
-        Self {
-            path_str: DB_PATH.to_string(),
-            map: Default::default(),
-        }
-    }
-}
-
-impl Deref for DB {
-    type Target = BiMap;
-
-    fn deref(&self) -> &Self::Target {
-        &self.map
-    }
-}
-
-impl DerefMut for DB {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.map
-    }
-}
-
-impl DB {
+impl Config {
+    // TODO: Make this return a Result<Self>
     pub fn load() -> Self {
-        let mut db = Self::default();
-        if let Ok(mut file) = File::open(&db.path_str) {
-            let mut contents = String::new();
-            file.read_to_string(&mut contents).expect("DB Readable");
-            db.map = serde_json::from_str(&contents).expect("DB deserializable");
-        }
-        return db;
+        let mut file = File::open(DB_PATH).expect("config openable");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).expect("DB Readable");
+
+        let config = match toml::from_str(contents.as_str()) {
+            Ok(config) => config,
+            Err(_) => Default::default(),
+        };
+        return config;
     }
 }
 
-impl Drop for DB {
+impl Drop for Config {
     fn drop(&mut self) {
         // TODO: load/store implementations
-        File::create(&self.path_str)
+        File::create(DB_PATH)
             .expect("db can be opened")
             .write_all(
-                serde_json::to_string(&self.map)
+                toml::to_string(&self)
                     .expect("DB is serializable")
                     .as_bytes(),
             )
@@ -93,9 +67,4 @@ impl Drop for DB {
 pub struct Entry {
     pub remote_path: String,
     pub local_path: String,
-}
-
-pub struct EntryRef<'a> {
-    pub remote_path: &'a String,
-    pub local_path: &'a String,
 }

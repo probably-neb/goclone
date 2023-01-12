@@ -1,7 +1,7 @@
 use clap::Args;
 
 use super::Run;
-use crate::{rclone::Rclone, db::DB};
+use crate::{rclone::Rclone, db::Config};
 
 // TODO: add checks and --no-check flag
 #[derive(Args, Debug, Clone)]
@@ -14,7 +14,7 @@ pub struct CheckDb {
 
 impl Run for CheckDb {
     fn run(&self) {
-        let db = DB::load();
+        let db = Config::load();
         println!("<local> -> <remote>");
         for entry in db.map.as_vec() {
             let both_exist = Rclone::exists(&entry.remote_path).and(Rclone::exists(&entry.local_path));

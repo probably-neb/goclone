@@ -1,7 +1,7 @@
 use clap::Args;
 
 use super::Run;
-use crate::db::{DB,Entry};
+use crate::db::Config;
 
 // TODO: add checks and --no-check flag
 #[derive(Args, Debug, Clone)]
@@ -14,7 +14,7 @@ pub struct List {
 
 impl Run for List {
     fn run(&self) {
-        let db = DB::load();
+        let db = Config::load();
         println!("<local> -> <remote>");
         for entry in db.map.as_vec() {
             println!("{} -> {}", entry.local_path, entry.remote_path);
