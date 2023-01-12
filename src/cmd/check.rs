@@ -1,7 +1,7 @@
 use clap::Args;
 
 use super::Run;
-use crate::{rclone::Rclone, db::Config};
+use crate::{rclone, db::Config};
 
 // TODO: add checks and --no-check flag
 #[derive(Args, Debug, Clone)]
@@ -17,7 +17,7 @@ impl Run for CheckDb {
         let db = Config::load();
         println!("<local> -> <remote>");
         for entry in db.map.as_vec() {
-            let both_exist = Rclone::exists(&entry.remote_path).and(Rclone::exists(&entry.local_path));
+            let both_exist = rclone::exists(&entry.remote_path).and(rclone::exists(&entry.local_path));
             let status = match both_exist {
                 Ok(_) => "Ok".to_string(),
                 Err(err) => format!("{:?}", err)
