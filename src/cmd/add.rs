@@ -25,12 +25,11 @@ impl Add {
 impl Run for Add {
     fn run(&self) {
         let mut db = Config::load();
-        let Entry { remote_path: _, local_path } = self.as_entry();
-        if !Path::new(&local_path).exists() {
+        let entry = self.as_entry();
+        if !Path::new(&entry.local_path).exists() {
             panic!("Local path must exist");
         }
         db.mappings.insert(self.as_entry());
-        println!("{db:?}");
         db.write();
     }
 }

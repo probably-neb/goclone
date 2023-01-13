@@ -1,4 +1,4 @@
-use anyhow::{Context, Result, format_err, anyhow};
+use anyhow::{Context, Result, anyhow};
 use std::process::Command;
 
 // TODO: Create rclone error type
@@ -22,7 +22,7 @@ fn rclone() -> Command {
     return Command::new("rclone");
 }
 
-pub fn exists(path: &String) -> Result<String> {
+pub fn exists(path: &str) -> Result<String> {
     run(rclone().arg("lsf").arg(path).arg("--dry-run"))
 }
 

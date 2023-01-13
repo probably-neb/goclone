@@ -2,7 +2,7 @@ use clap::Args;
 
 use super::Run;
 use crate::{
-    db::{Config, Entry},
+    db::Config,
     rclone,
 };
 
