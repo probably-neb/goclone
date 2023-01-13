@@ -7,18 +7,17 @@ const DB_PATH: &str = "./goclone.toml";
 
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config {
-    pub map: PathMap,
+    pub exclude: Vec<String>,
+    pub mappings: PathMap,
 }
 
 #[derive(Deserialize, Serialize, Default, Debug)]
-pub struct PathMap {
-    pub local_to_remote: HashMap<String, String>,
-}
+pub struct PathMap(pub HashMap<String, String>);
 
 impl PathMap {
     pub fn as_vec(&self) -> Vec<Entry> {
         let entries: Vec<Entry> = self
-            .local_to_remote
+            .0
             .iter()
             .map(|(local_path, remote_path)| Entry {
                 local_path: local_path.clone(),
@@ -28,8 +27,19 @@ impl PathMap {
         return entries;
     }
 
+    pub fn get(&self, from: &String) -> Option<Entry> {
+        // Naively assumes from is local path
+        // FIXME: check for remote paths as well
+        // and come up with way to resolve local path from remote
+        let remote_path = self.0.get(from)?.clone();
+        return Some(Entry {
+            remote_path,
+            local_path: from.clone(),
+        });
+    }
+
     pub fn insert(&mut self, entry: Entry) {
-        self.local_to_remote
+        self.0
             .insert(entry.local_path, entry.remote_path);
     }
 }
@@ -43,23 +53,22 @@ impl Config {
 
         let config = match toml::from_str(contents.as_str()) {
             Ok(config) => config,
+            // FIXME: return error on config error, default on empty
             Err(_) => Default::default(),
         };
         return config;
     }
-}
 
-impl Drop for Config {
-    fn drop(&mut self) {
-        // TODO: load/store implementations
+    pub fn write(&self) {
         File::create(DB_PATH)
             .expect("db can be opened")
             .write_all(
-                toml::to_string(&self)
+                toml::to_string_pretty(&self)
                     .expect("DB is serializable")
                     .as_bytes(),
             )
             .expect("DB is writeable");
+        
     }
 }
 

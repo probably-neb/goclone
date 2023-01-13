@@ -11,7 +11,7 @@ impl Run for CheckDb {
     fn run(&self) {
         let db = Config::load();
         println!("<local> -> <remote>");
-        for entry in db.map.as_vec() {
+        for entry in db.mappings.as_vec() {
             let both_exist =
                 rclone::exists(&entry.remote_path).and(rclone::exists(&entry.local_path));
             let status = match both_exist {

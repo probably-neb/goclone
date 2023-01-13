@@ -16,7 +16,7 @@ impl Run for List {
     fn run(&self) {
         let db = Config::load();
         println!("<local> -> <remote>");
-        for entry in db.map.as_vec() {
+        for entry in db.mappings.as_vec() {
             println!("{} -> {}", entry.local_path, entry.remote_path);
         }
     }

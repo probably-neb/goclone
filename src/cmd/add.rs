@@ -29,8 +29,9 @@ impl Run for Add {
         if !Path::new(&local_path).exists() {
             panic!("Local path must exist");
         }
-        db.map.insert(self.as_entry());
+        db.mappings.insert(self.as_entry());
         println!("{db:?}");
+        db.write();
     }
 }
 
