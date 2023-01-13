@@ -2,12 +2,11 @@ use enum_dispatch::enum_dispatch;
 use clap::Subcommand;
 pub use clap::Parser;
 
+// Commands
 mod add;
-use add::Add;
 mod list;
-use list::List;
 mod check;
-use check::CheckDb;
+mod copy;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -22,14 +21,10 @@ pub struct Cli {
 #[enum_dispatch]
 #[derive(Subcommand, Debug)]
 pub enum SubCommands {
-    // /// Copy the files from a given path to the mapped destination
-    // #[command(author,version,about,long_about=None)]
-    // Copy(Copy),
-    /// Add a mapping between a remote and local path
-    #[command(author,version,about,long_about=None)]
-    Add(Add),
-    List(List),
-    CheckDb(CheckDb),
+    Add(add::Add),
+    List(list::List),
+    CheckDb(check::CheckDb),
+    Copy(copy::Copy),
 }
 
 #[enum_dispatch(SubCommands)]

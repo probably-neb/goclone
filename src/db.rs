@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::fs::File;
+use std::fs::{File, self};
 use std::io::prelude::*;
 
 const DB_PATH: &str = "./goclone.toml";
@@ -31,16 +31,21 @@ impl PathMap {
         // Naively assumes from is local path
         // FIXME: check for remote paths as well
         // and come up with way to resolve local path from remote
-        let remote_path = self.0.get(from)?.clone();
+        let from = Self::canonicalize_path(from.as_str());
+        let remote_path = self.0.get(&from)?.clone();
         return Some(Entry {
             remote_path,
-            local_path: from.clone(),
+            local_path: from,
         });
+    }
+
+    fn canonicalize_path(local_path: &str) -> String {
+        fs::canonicalize(local_path).expect("File Exists").into_os_string().into_string().unwrap() 
     }
 
     pub fn insert(&mut self, entry: Entry) {
         self.0
-            .insert(entry.local_path, entry.remote_path);
+            .insert(dbg!(Self::canonicalize_path(entry.local_path.as_str())), entry.remote_path);
     }
 }
 
