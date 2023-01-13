@@ -33,6 +33,7 @@ pub enum SubCommands {
     Copy(copy::Copy),
 }
 
+// TODO: make run return result
 #[enum_dispatch(SubCommands)]
 pub trait Run {
     fn pre_run(&mut self) {}

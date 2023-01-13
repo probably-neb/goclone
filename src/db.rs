@@ -5,6 +5,8 @@ use std::fs::{self, File};
 use std::io::prelude::*;
 use toml_edit::easy as toml;
 
+use crate::iter_exclude;
+
 const DB_PATH: &str = "./goclone.toml";
 
 #[derive(Deserialize, Serialize, Debug, Default)]
@@ -13,6 +15,8 @@ pub struct Config {
     pub mappings: PathMap,
 }
 
+// FIXME: create enum with String and table variants that can 
+// be desearialized to make converting from _Config to Config cleaner
 #[derive(Deserialize, Serialize, Debug, Default)]
 struct _Config {
     pub exclude: Option<Vec<String>>,
@@ -51,7 +55,6 @@ impl PathMap {
         return self.0.values().collect();
     }
 
-    // FIXME: Make this return &Entry
     pub fn get(&self, from: &str) -> Option<&Entry> {
         // Naively assumes from is local path
         // FIXME: check for remote paths as well
@@ -93,7 +96,7 @@ impl Config {
         let config: _Config = match toml::from_str(contents) {
             Ok(config) => config,
             // FIXME: return error on config error, default on empty
-            Err(_) => Default::default(),
+            Err(e) => panic!("Invalid Config: {e:?}"),
         };
         return config.into_config().unwrap();
         // return config;
@@ -114,13 +117,14 @@ impl Config {
     //     )
     // }
 
-    pub fn add_mapping(&mut self, entry: Entry) {
+    pub fn add_mapping(&mut self, mut entry: Entry) {
         // load and modify config file contents using toml_edit
         let contents = Self::load_config_file();
         let mut doc = contents
             .parse::<toml_edit::Document>()
             .expect("Invalid Config");
 
+        entry.local_path = PathMap::canonicalize_path(entry.local_path.as_str());
         doc["mappings"][entry.local_path.as_str()] = toml_edit::value(entry.remote_path.as_str());
 
         Self::_write(doc.to_string().as_str());
@@ -132,6 +136,10 @@ impl Config {
         // doesn't have to be
         self.mappings.insert(entry);
     }
+
+    pub(crate) fn get_excluded(&self) -> impl Iterator<Item=&str> {
+        iter_exclude!(self.exclude)
+    }
 }
 
 /// Used to avoid positional args
@@ -140,6 +148,7 @@ pub struct Entry {
     pub remote_path: String,
     #[serde(skip)]
     pub local_path: String,
+    pub exclude: Option<Vec<String>>,
 }
 
 impl Entry {
@@ -147,6 +156,7 @@ impl Entry {
         Self {
             remote_path,
             local_path,
+            ..Default::default()
         }
     }
 }
@@ -171,6 +181,7 @@ impl TryFrom<toml::value::Table> for Entry {
     type Error = anyhow::Error;
 
     fn try_from(value: toml::value::Table) -> Result<Self, Self::Error> {
+        // FIXME: GROSS!
         toml::from_str(toml::to_string(&value)?.as_str()).with_context(|| "Welp")
     }
 }
@@ -189,6 +200,7 @@ mod test {
         let entry = Entry {
             local_path: "/dev/null".to_string(),
             remote_path: "dropbox:".to_string(),
+            ..Default::default()
         };
         let mappings: HashMap<String, Entry> =
             [(entry.local_path.clone(), entry)].into_iter().collect();
@@ -205,6 +217,7 @@ mod test {
         let entry = Entry {
             local_path: "/dev/null".to_string(),
             remote_path: "dropbox:".to_string(),
+            ..Default::default()
         };
         let mappings: HashMap<String, Entry> =
             [(entry.local_path.clone(), entry)].into_iter().collect();
