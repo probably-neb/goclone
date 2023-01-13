@@ -7,7 +7,17 @@ use toml_edit::easy as toml;
 
 use crate::iter_exclude;
 
-const DB_PATH: &str = "./goclone.toml";
+lazy_static::lazy_static!{
+    pub static ref DB_PATH: std::path::PathBuf = {
+        let mut path = std::env::current_exe().unwrap();
+        // assert!(path.ends_with("/target/release/goclone"));
+        for _ in 0..3 {
+            path.pop();
+        }
+        path.push("goclone.toml");
+        path
+    };
+}
 
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config {
@@ -85,7 +95,7 @@ impl Config {
     }
 
     fn load_config_file() -> String {
-        let mut file = File::open(DB_PATH).expect("config openable");
+        let mut file = File::open(&*DB_PATH).expect("config openable");
         let mut contents = String::new();
         file.read_to_string(&mut contents).expect("DB Readable");
 
@@ -103,7 +113,7 @@ impl Config {
     }
 
     pub fn _write(contents: &str) {
-        File::create(DB_PATH)
+        File::create(&*DB_PATH)
             .expect("db can be opened")
             .write_all(contents.as_bytes())
             .expect("DB is writeable");
