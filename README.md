@@ -1,28 +1,42 @@
 # wrapper for rclone that remembers what goes where
 
+CRITICAL:
+
+- [ ] fix config needs to be in cwd
+- [ ] pass through of rclone output
+- [ ] improve error handling => move everything to results
+- [ ] move paths from String/&str to PathBuf/&Path
+- [ ] checking of config file on open / command
+  - [ ] normalize paths
+  - [ ] check remotes are real
+  - [ ] check paths exist
+
 TODO LIST:
 
+- [ ] add -P rclone progress
 - [x] add
 - [x] copy
 - [x] list
 - [ ] sync
+  - [ ] "rclone passthrough" trait or similar for
+        commands that pass their input through to rclone
+        and allow normal flags
 - [ ] configs:
-  - [x] config is used as db
-  - [x] toml?
-  - [x] mappings are listed
-  - [ ] extra variables can be set like in cargo:
+  - [x] toml config is used instead of db with mappings listed
+  - [ ] extra variables (in mappings) can be set like in cargo:
     - [x] remote (carryover)
-    - [ ] ignore patterns
+    - [x] ignore patterns
     - [ ] systemd service y/n + time
     - [ ] allow multiple remotes
+    - [ ] custom flags (like platform specific)
   - [ ] options:
     - [ ] exclude (move exclude into options)
-    - [ ] editor
+    - [ ] remote specific commands
 - [ ] systemd service / cronjob management
-- [ ] rename
-  - [ ] local
-  - [ ] remote
-- [ ] edit-config/config command
+  - [ ] how to organize?
+    - one per unique time step?
+    - one per item
+- [ ] edit config command
 - [ ] [syncing of git repos](https://www.sobyte.net/post/2021-12/using-dropbox-as-git-remote-rep/)
-  - how to specify different set of ignored files for backup?
-    (maybe look at how branch specific git ignores work)
+  - basically just creating a bare repo locally and
+    syncing that with the remote on push
