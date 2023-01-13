@@ -10,4 +10,4 @@ anyhow = "1.0.68"
 clap = { version = "4.0.29", features = ["derive"] }
 enum_dispatch = "0.3.8"
 serde = { version = "1.0.150", features = ["derive"] }
-toml = "0.5.10"
+toml_edit = {version = "0.17", features=["easy"]}

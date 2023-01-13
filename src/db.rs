@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::{File, self};
 use std::io::prelude::*;
+use toml_edit::easy as toml;
 
 const DB_PATH: &str = "./goclone.toml";
 
@@ -27,11 +28,11 @@ impl PathMap {
         return entries;
     }
 
-    pub fn get(&self, from: &String) -> Option<Entry> {
+    pub fn get(&self, from: &str) -> Option<Entry> {
         // Naively assumes from is local path
         // FIXME: check for remote paths as well
         // and come up with way to resolve local path from remote
-        let from = Self::canonicalize_path(from.as_str());
+        let from = Self::canonicalize_path(from);
         let remote_path = self.0.get(&from)?.clone();
         return Some(Entry {
             remote_path,
@@ -47,6 +48,7 @@ impl PathMap {
         self.0
             .insert(dbg!(Self::canonicalize_path(entry.local_path.as_str())), entry.remote_path);
     }
+
 }
 
 impl Config {
@@ -74,6 +76,23 @@ impl Config {
             )
             .expect("DB is writeable");
         
+    }
+
+    pub fn add_mapping(&mut self, entry: Entry) {
+        let mut file = File::open(DB_PATH).expect("config openable");
+        let mut contents = String::new();
+        file.read_to_string(&mut contents).expect("DB Readable");
+        let mut doc = contents.parse::<toml_edit::Document>().expect("Invalid Config");
+        doc["mappings"][entry.local_path.as_str()] = toml_edit::value(entry.remote_path.as_str());
+        File::create(DB_PATH)
+            .expect("db can be opened")
+            .write_all(
+                doc.to_string()
+                    .as_bytes(),
+            )
+            .expect("DB is writeable");
+
+        self.mappings.insert(entry);
     }
 }
 

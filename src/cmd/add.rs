@@ -29,8 +29,7 @@ impl Run for Add {
         if !Path::new(&entry.local_path).exists() {
             panic!("Local path must exist");
         }
-        db.mappings.insert(self.as_entry());
-        db.write();
+        db.add_mapping(entry);
     }
 }
 
@@ -41,4 +40,3 @@ impl From<Add> for Entry {
         return Self {remote_path, local_path};
     }
 }
-
