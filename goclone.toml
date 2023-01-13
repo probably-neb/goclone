@@ -1,6 +1,0 @@
-exclude = []
-
-[mappings]
-"/home/neb/code/goclone/README.md" = "db:goclone"
-"~/code/goclone/spec.md" = "db:goclone"
-"/home/neb/code/goclone/spec.md" = "db:goclone"
