@@ -1,5 +1,3 @@
-use std::convert::identity;
-
 use clap::Args;
 
 use super::Run;
@@ -19,12 +17,14 @@ impl Run for List {
         let db = Config::load();
         match &self.path {
             Some(path) => {
-                let entry = db.mappings.get(path.as_str());
+                let entry = db
+                    .mappings
+                    .get(path.as_str())
+                    .expect("Only Configured Mappings Can Be Listed");
                 let excluded = db
                     .get_excluded()
                     .chain(iter_exclude!(self.exclude))
-                    .chain(iter_exclude!(entry; |e| iter_exclude!(e.exclude => identity))
-                );
+                    .chain(iter_exclude!(entry.exclude));
 
                 println!("{}", rclone::ls(path.as_str(), Some(excluded)).unwrap());
             }
