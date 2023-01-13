@@ -1,3 +1,6 @@
-[local_to_remote]
-"./db.toml" = "db:goclone"
-"./README.md" = "db:remote"
+exclude = []
+
+[mappings]
+"/home/neb/code/goclone/README.md" = "db:goclone"
+"~/code/goclone/spec.md" = "db:goclone"
+"/home/neb/code/goclone/spec.md" = "db:goclone"

@@ -23,7 +23,7 @@ impl Add {
 }
 
 impl Run for Add {
-    fn run(&self) {
+    fn run(&mut self) {
         let mut db = Config::load();
         let entry = self.as_entry();
         if !Path::new(&entry.local_path).exists() {

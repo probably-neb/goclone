@@ -8,7 +8,7 @@ const DB_PATH: &str = "./goclone.toml";
 
 #[derive(Deserialize, Serialize, Debug, Default)]
 pub struct Config {
-    pub exclude: Vec<String>,
+    pub exclude: Option<Vec<String>>,
     pub mappings: PathMap,
 }
 
@@ -54,11 +54,20 @@ impl PathMap {
 impl Config {
     // TODO: Make this return a Result<Self>
     pub fn load() -> Self {
+        let contents = Self::load_config_file();
+        Self::_load(contents.as_str())
+    }
+
+    fn load_config_file() -> String {
         let mut file = File::open(DB_PATH).expect("config openable");
         let mut contents = String::new();
         file.read_to_string(&mut contents).expect("DB Readable");
 
-        let config = match toml::from_str(contents.as_str()) {
+        return contents;
+    }
+
+    fn _load(contents: &str) -> Self {
+        let config = match toml::from_str(contents) {
             Ok(config) => config,
             // FIXME: return error on config error, default on empty
             Err(_) => Default::default(),
@@ -66,38 +75,60 @@ impl Config {
         return config;
     }
 
-    pub fn write(&self) {
+    pub fn _write(contents: &str) {
         File::create(DB_PATH)
             .expect("db can be opened")
             .write_all(
-                toml::to_string_pretty(&self)
-                    .expect("DB is serializable")
+                contents
                     .as_bytes(),
             )
             .expect("DB is writeable");
-        
     }
 
-    pub fn add_mapping(&mut self, entry: Entry) {
-        let mut file = File::open(DB_PATH).expect("config openable");
-        let mut contents = String::new();
-        file.read_to_string(&mut contents).expect("DB Readable");
-        let mut doc = contents.parse::<toml_edit::Document>().expect("Invalid Config");
-        doc["mappings"][entry.local_path.as_str()] = toml_edit::value(entry.remote_path.as_str());
-        File::create(DB_PATH)
-            .expect("db can be opened")
-            .write_all(
-                doc.to_string()
-                    .as_bytes(),
-            )
-            .expect("DB is writeable");
+    // pub fn write(&self) {
+    //     Self::_write(
+    //             toml::to_string_pretty(&self)
+    //                 .expect("DB is serializable")
+    //                 .as_str()
+    //     )
+    // }
 
+    pub fn add_mapping(&mut self, entry: Entry) {
+        // load and modify config file contents using toml_edit
+        let contents = Self::load_config_file();
+        let mut doc = contents.parse::<toml_edit::Document>().expect("Invalid Config");
+        
+        doc["mappings"][entry.local_path.as_str()] = toml_edit::value(entry.remote_path.as_str());
+
+        Self::_write( doc.to_string().as_str());
+
+        // update self with this change as well
+        // 
+        // doubles as an excuse to make self mut like it should be 
+        // without clippy yelling at me for making it mut when it 
+        // doesn't have to be
         self.mappings.insert(entry);
     }
 }
 
-/// Used to avoid positional args in BiMap
+/// Used to avoid positional args
 pub struct Entry {
     pub remote_path: String,
     pub local_path: String,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn load_direct_mapping() {
+        let toml = r#"
+[mappings]
+"/dev/null" = "dropbox:"
+"#;
+        let config = Config::_load(toml);
+        let mappings: HashMap<String, String> = [("/dev/null".to_string(),"dropbox:".to_string())].into_iter().collect();
+        assert!(config.mappings.0 == mappings,"{:?}", config.mappings);
+    }
 }

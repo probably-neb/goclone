@@ -4,7 +4,6 @@ mod rclone;
 use cmd::{Cli, Parser, Run};
 
 fn main() {
-    let cli = Cli::parse();
-    println!("{:?}", cli);
-    cli.subcommand.run_all();
+    let mut cli = Cli::parse();
+    cli.run();
 }

@@ -1,7 +1,3 @@
-goclone
-db.json
-spec.md
 target
-db
-olddb.json
 Cargo.lock
+goclone.toml

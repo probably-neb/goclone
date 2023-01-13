@@ -1,12 +1,12 @@
-use enum_dispatch::enum_dispatch;
-use clap::Subcommand;
 pub use clap::Parser;
+use clap::Subcommand;
+use enum_dispatch::enum_dispatch;
 
 // Commands
 mod add;
-mod list;
 mod check;
 mod copy;
+mod list;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
@@ -15,7 +15,13 @@ pub struct Cli {
     #[arg(short, long, default_value_t = false)]
     pub verbose: bool,
     #[command(subcommand)]
-    pub subcommand: SubCommands
+    pub subcommand: SubCommands,
+}
+
+impl Run for Cli {
+    fn run(&mut self) {
+        self.subcommand.run_all();
+    }
 }
 
 #[enum_dispatch]
@@ -29,10 +35,10 @@ pub enum SubCommands {
 
 #[enum_dispatch(SubCommands)]
 pub trait Run {
-    fn pre_run(&self) {}
-    fn run(&self);
-    fn post_run(&self) {}
-    fn run_all(&self) {
+    fn pre_run(&mut self) {}
+    fn run(&mut self);
+    fn post_run(&mut self) {}
+    fn run_all(&mut self) {
         self.pre_run();
         self.run();
         self.post_run();
@@ -41,4 +47,3 @@ pub trait Run {
 
 // #[derive(Args,Debug)]
 // struct Copy;
-

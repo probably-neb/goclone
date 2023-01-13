@@ -1,7 +1,7 @@
 use anyhow::{Context, Result, anyhow};
 use std::process::Command;
 
-// TODO: Create rclone error type
+// TODO: Create rclone error type and type alias for output String
 
 fn run(cmd: &mut Command) -> Result<String> {
     let output = cmd.output().with_context(|| {
@@ -11,7 +11,7 @@ fn run(cmd: &mut Command) -> Result<String> {
             cmd.get_args()
         )
     })?;
-    // return output.status.exit_ok().map(|_| str::from_utf8(&output.stdout));
+
     match output.status.success() {
         true => Ok(std::str::from_utf8(&output.stdout)?.to_string()),
         false => Err(anyhow!(std::str::from_utf8(&output.stderr)?.to_string()))

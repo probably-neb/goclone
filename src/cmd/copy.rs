@@ -14,7 +14,7 @@ pub struct Copy {
 }
 
 impl Run for Copy {
-    fn run(&self) {
+    fn run(&mut self) {
         let db = Config::load();
         let entry = db.mappings.get(&self.src).expect("Can only copy item with declared mapping");
         println!("{:?}",rclone::copy(entry.local_path.as_str(), entry.remote_path.as_str()));

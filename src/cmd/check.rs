@@ -8,7 +8,7 @@ use crate::{db::Config, rclone};
 pub struct CheckDb {}
 
 impl Run for CheckDb {
-    fn run(&self) {
+    fn run(&mut self) {
         let db = Config::load();
         println!("<local> -> <remote>");
         for entry in db.mappings.as_vec() {
