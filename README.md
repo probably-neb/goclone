@@ -1,9 +1,13 @@
-# wrapper for rclone that remembers what goes where
+# GOCLONE: a wrapper for rclone that remembers what goes where
+
+[![LOC](https://tokei.rs/b1/github/probably-neb/goclone?category=lines)](https://github.com/probably-neb/goclone)
+
+## WIP
 
 CRITICAL:
 
-- [ ] fix config needs to be in cwd
 - [ ] pass through of rclone output
+  - [ ] add -P rclone progress
 - [ ] improve error handling => move everything to results
 - [ ] move paths from String/&str to PathBuf/&Path
 - [ ] checking of config file on open / command
@@ -13,7 +17,6 @@ CRITICAL:
 
 TODO LIST:
 
-- [ ] add -P rclone progress
 - [x] add
 - [x] copy
 - [x] list
