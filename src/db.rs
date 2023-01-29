@@ -169,6 +169,9 @@ impl Entry {
             ..Default::default()
         }
     }
+    pub fn excluded(&self) -> impl Iterator<Item=&str> {
+        iter_exclude!(self.exclude)
+    }
 }
 
 impl TryFrom<(String, toml::Value)> for Entry {

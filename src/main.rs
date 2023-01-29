@@ -1,4 +1,5 @@
 #![feature(anonymous_lifetime_in_impl_trait)]
+#![feature(iter_intersperse)]
 
 mod db;
 mod cmd;
